@@ -1,282 +1,14 @@
 #include "ofAppPi.h"
 
-//--------------------------------------------------------------
-//        ofAppPi_SingleWindow
-//--------------------------------------------------------------
-
-ofAppPi::ofAppPi(void) {
-    for(int i=0; i<NCHANNELS; i++)
-    {
-        approximator[i].main_app = this;
-        approximator[i].setTransposeFactor(TRANSPOSITION_FACTOR[i]);
-        approximator[i].wNum = i+1;
-        approximator[i].fbo.allocate(ofGetWindowWidth(), ofGetWindowHeight());
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::setup(){
-    ofSetDataPathRoot("/Resources/data/");
-    
-    receiver.setup(RECEIVE_PORT);
-    sender.setup(SEND_HOST, SEND_PORT);
-    self_sender.setup(RECEIVE_HOST, RECEIVE_PORT);
-    
-    ofSoundStreamSetup(NCHANNELS, 0);
-}
-
-//--------------------------------------------------------------
-void ofAppPi::update(){
-    
-    for (int i=0; i<NCHANNELS; ++i)
-    {
-        ofSetBackgroundColor(approximator[i].bgColor);
-        
-        // write to frame buffer object
-        approximator[i].fbo.begin();
-        ofTranslate(approximator[i].fontSize,  approximator[i].verticalFontMargin);
-        ofClear(0, 0, 0, 0);
-        ofPushMatrix();
-        if (status == 2) {
-            approximator[i].drawDigits();
-        } else if (status == 1) {
-            approximator[i].drawStatus();
-        } else if (status == 0) {
-            approximator[i].drawBlack();
-        }
-        ofPopMatrix();
-        approximator[i].fbo.end();
-    }
-    
-    
-    while( receiver.hasWaitingMessages() )
-    {
-        // get the next message
-        ofxOscMessage m;
-        receiver.getNextMessage(&m);
-        if (m.getAddress() == "/togglePlay")
-        {
-            togglePlay();
-        }
-        if (m.getAddress() == "/reset")
-        {
-            stopPlayback();
-        }
-        if (m.getAddress() == "/toggleMute")
-        {
-            toggleMute();
-        }
-        if (m.getAddress() == "/toggleStatus")
-        {
-            int statusValue = m.getArgAsInt(0);
-            toggleStatus(statusValue);
-        }
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::draw(){
-    int x = 0;
-    int y = 0;
-    for (int i=0; i<NCHANNELS; ++i)
-    {
-        ofPushMatrix();
-        if (!approximator[i].hasEnded())
-        {
-            float scaleX = ofGetWindowWidth()*0.33;
-            float scaleY = ofGetWindowHeight()*0.5;
-            ofTranslate(x*scaleX, y*scaleY);
-            approximator[i].scaleContent(scaleX, scaleY);
-            approximator[i].fbo.draw(0,0);
-        }
-        else
-        {
-            approximator[i].drawBlack();
-        }
-        ofPopMatrix();
-        
-        ++x;
-        if (x%3 == 0)
-        {
-            ++y;
-            x = 0;
-        }
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::toggleMute() {
-    for(int i=0; i<NCHANNELS; i++) {
-        approximator[i].toggleMute();
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::stopPlayback() {
-    for(int i=0; i<NCHANNELS; i++) {
-        approximator[i].playing = false;
-        approximator[i].Reset();
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::togglePlay(void) {
-    for(int i=0; i<NCHANNELS; i++)
-        approximator[i].playing = !approximator[i].playing;
-}
-
-//--------------------------------------------------------------
-
-bool ofAppPi::isPlaying(void) { // Returns false if any one of them is not playing
-    bool return_value;
-    for(int i=0; i<NCHANNELS; i++)
-        return_value = ( return_value && approximator[i].isPlaying() );
-    return return_value;
-}
-
-//--------------------------------------------------------------
-void ofAppPi::keyPressed(int key){
-    if(key == ' ')
-    {
-        ofxOscMessage m;
-        m.setAddress("/togglePlay");
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-    if(key == 'm')
-    {
-        ofxOscMessage m;
-        m.setAddress("/toggleMute");
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-    if(key == '1')
-    {
-        status = 0;
-        ofxOscMessage m;
-        m.setAddress("/toggleStatus");
-        m.addIntArg(status);
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-    if(key == '2')
-    {
-        status = 1;
-        ofxOscMessage m;
-        m.setAddress("/toggleStatus");
-        m.addIntArg(status);
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-    if(key == '3')
-    {
-        status = 2;
-        ofxOscMessage m;
-        m.setAddress("/toggleStatus");
-        m.addIntArg(status);
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-    if(key == '0')
-    {
-        ofxOscMessage m;
-        m.setAddress("/reset");
-        sender.sendMessage( m );
-        self_sender.sendMessage(m);
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::audioOut( float * output, int bufferSize, int nChannels ) {
-    for (int i=0; i<bufferSize * nChannels; i+=nChannels)
-    {
-        
-        for (int chan=0; chan<nChannels; chan++)
-        {
-            // check for when the piece should end
-            if (approximator[chan].sampleCounter >= END_TIME_IN_MINUTES*60.0*SR && (approximator[chan].sampleCounter%4410) == 0)
-            {
-                if (!approximator[chan].hasEnded() && endFlag )
-                {
-                    approximator[chan].end();
-                    endFlag = false;
-                }
-            }
-            
-            if (approximator[chan].isPlaying() && !approximator[chan].hasEnded())
-            {
-                    output[i+chan] = approximator[chan].tick();
-            }
-        }
-        
-        if (approximator[0].sampleCounter >= END_TIME_IN_MINUTES*60.0*SR)
-        {
-            endFlag = true;
-        }
-    }
-}
-
-//--------------------------------------------------------------
-void ofAppPi::keyReleased(int key){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mouseMoved(int x, int y ){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mouseDragged(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mousePressed(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mouseReleased(int x, int y, int button){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mouseEntered(int x, int y){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::mouseExited(int x, int y){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::windowResized(int w, int h){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::gotMessage(ofMessage msg){
-    
-}
-
-//--------------------------------------------------------------
-void ofAppPi::dragEvent(ofDragInfo dragInfo){ 
-    
-}
-//--------------------------------------------------------------
-void ofAppPi::exit(void) {
-    ofSoundStreamClose();
-}
-
-//--------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 //            ofPiApproximator
-//--------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 
 
-ofPiApproximator::ofPiApproximator(void)
+
+ofPiApproximator::ofPiApproximator(PiSettings& settings)
 {
+    fontSize = min(settings.windowWidth, settings.windowHeight)*0.25;
     NumberFont.load("Futura-Medium.ttf", fontSize);
     StatusFont.load("Futura-Medium.ttf", fontSize*0.25);
     piSymbol.load("pi.png");
@@ -391,3 +123,251 @@ void ofPiApproximator::drawStatus(void)
         StatusFont.drawString("Mute", xMargin, lineSpacing*4);
     }
 }
+
+//--------------------------------------------------------------
+//        ofAppPi_SingleWindow
+//--------------------------------------------------------------
+
+ofAppPi::ofAppPi(PiSettings AppSettings)
+{
+    settings = AppSettings;
+    
+    for(int i=0; i<settings.nChannels; i++)
+        approximator.push_back(new ofPiApproximator(settings));
+        
+    
+//    setNumChannels(settings.nChannels);
+    
+    for(int i=0; i<settings.nChannels; i++)
+    {
+        approximator[i]->main_app = this;
+        approximator[i]->setTransposeFactor(TRANSPOSITION_FACTOR[i]);
+        approximator[i]->wNum = i+1;
+        approximator[i]->fbo.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+    }
+}
+
+void ofAppPi::setup(){
+    ofSetDataPathRoot("../Resources/data/");
+    
+    receiver.setup(RECEIVE_PORT);
+    sender.setup(SEND_HOST, SEND_PORT);
+    self_sender.setup(RECEIVE_HOST, RECEIVE_PORT);
+    
+    soundStream.setDeviceID(settings.audioDeviceID);
+    soundStream.setup(this, settings.nChannels, 0, SR, 256, 2);
+}
+
+void ofAppPi::update(){
+    
+    for (int i=0; i<settings.nChannels; ++i)
+    {
+        ofSetBackgroundColor(approximator[i]->bgColor);
+        
+        // write to frame buffer object
+        approximator[i]->fbo.begin();
+        ofTranslate(approximator[i]->fontSize,  approximator[i]->verticalFontMargin);
+        ofClear(0, 0, 0, 0);
+        ofPushMatrix();
+        if (status == 2) {
+            approximator[i]->drawDigits();
+        } else if (status == 1) {
+            approximator[i]->drawStatus();
+        } else if (status == 0) {
+            approximator[i]->drawBlack();
+        }
+        ofPopMatrix();
+        approximator[i]->fbo.end();
+    }
+    
+    
+    while( receiver.hasWaitingMessages() )
+    {
+        // get the next message
+        ofxOscMessage m;
+        receiver.getNextMessage(&m);
+        if (m.getAddress() == "/togglePlay")
+        {
+            togglePlay();
+        }
+        if (m.getAddress() == "/reset")
+        {
+            stopPlayback();
+        }
+        if (m.getAddress() == "/toggleMute")
+        {
+            toggleMute();
+        }
+        if (m.getAddress() == "/toggleStatus")
+        {
+            int statusValue = m.getArgAsInt(0);
+            toggleStatus(statusValue);
+        }
+    }
+}
+
+void ofAppPi::draw(){
+    int x = 0;
+    int y = 0;
+    
+    if(settings.nChannels<4)
+    {
+        for (int i=0; i<settings.nChannels; ++i)
+        {
+            ofPushMatrix();
+            if (!approximator[i]->hasEnded())
+            {
+                float scaleX = ofGetWindowWidth()*(1.0f/settings.nChannels);
+                float scaleY = ofGetWindowHeight();
+                ofTranslate(x*scaleX, y*scaleY);
+                approximator[i]->scaleContent(scaleX, scaleY);
+                approximator[i]->fbo.draw(0,0);
+            }
+            else
+            {
+                approximator[i]->drawBlack();
+            }
+            ofPopMatrix();
+            
+            ++x;
+        }
+    }
+
+    else if(settings.nChannels>=4)  // Make two rows
+    {
+        for (int i=0; i<settings.nChannels; ++i)
+        {
+            ofPushMatrix();
+            if (!approximator[i]->hasEnded())
+            {
+                float scaleX = ofGetWindowWidth()*(2.0f/settings.nChannels);
+                float scaleY = ofGetWindowHeight()*0.5;
+                ofTranslate(x*scaleX, y*scaleY);
+                approximator[i]->scaleContent(scaleX, scaleY);
+                approximator[i]->fbo.draw(0,0);
+            }
+            else
+            {
+                approximator[i]->drawBlack();
+            }
+            ofPopMatrix();
+            
+            ++x;
+            if (x%(settings.nChannels/2) == 0)
+            {
+                ++y;
+                x = 0;
+            }
+        }
+    }
+}
+
+void ofAppPi::toggleMute() {
+    for(int i=0; i<settings.nChannels; i++) {
+        approximator[i]->toggleMute();
+    }
+}
+
+void ofAppPi::stopPlayback() {
+    for(int i=0; i<settings.nChannels; i++) {
+        approximator[i]->playing = false;
+        approximator[i]->Reset();
+    }
+}
+
+void ofAppPi::togglePlay(void) {
+    for(int i=0; i<settings.nChannels; i++)
+        approximator[i]->playing = !approximator[i]->playing;
+}
+
+bool ofAppPi::isPlaying(void) { // Returns false if any one of them is not playing
+    bool return_value;
+    for(int i=0; i<settings.nChannels; i++)
+        return_value = ( return_value && approximator[i]->isPlaying() );
+    return return_value;
+}
+
+void ofAppPi::keyPressed(int key){
+    if(key == ' ')
+    {
+        ofxOscMessage m;
+        m.setAddress("/togglePlay");
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+    if(key == 'm')
+    {
+        ofxOscMessage m;
+        m.setAddress("/toggleMute");
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+    if(key == '1')
+    {
+        status = 0;
+        ofxOscMessage m;
+        m.setAddress("/toggleStatus");
+        m.addIntArg(status);
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+    if(key == '2')
+    {
+        status = 1;
+        ofxOscMessage m;
+        m.setAddress("/toggleStatus");
+        m.addIntArg(status);
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+    if(key == '3')
+    {
+        status = 2;
+        ofxOscMessage m;
+        m.setAddress("/toggleStatus");
+        m.addIntArg(status);
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+    if(key == '0')
+    {
+        ofxOscMessage m;
+        m.setAddress("/reset");
+        sender.sendMessage( m );
+        self_sender.sendMessage(m);
+    }
+}
+
+void ofAppPi::audioOut( float * output, int bufferSize, int nChannels ) {
+    for (int i=0; i<bufferSize * nChannels; i+=nChannels)
+    {
+        
+        for (int chan=0; chan<nChannels; chan++)
+        {
+            // check for when the piece should end
+            if (approximator[chan]->sampleCounter >= settings.dur_in_mins*60.0*SR && (approximator[chan]->sampleCounter%4410) == 0)
+            {
+                if (!approximator[chan]->hasEnded() && endFlag )
+                {
+                    approximator[chan]->end();
+                    endFlag = false;
+                }
+            }
+            
+            if (approximator[chan]->isPlaying() && !approximator[chan]->hasEnded())
+            {
+                    output[i+chan] = approximator[chan]->tick();
+            }
+        }
+        
+        if (approximator[0]->sampleCounter >= settings.dur_in_mins*60.0*SR)
+        {
+            endFlag = true;
+        }
+    }
+}
+
+void ofAppPi::exit(void) {
+    ofSoundStreamClose();
+}
+
