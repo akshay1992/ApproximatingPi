@@ -5,6 +5,7 @@
 #include "ofxOsc.h"
 #include <vector>
 #include "PiSettings.h"
+#include "ApproximatingPi/ofApproxPiSetupApp.h"
 
 #define AKSHAY
 //#define MATZE
@@ -25,12 +26,6 @@
 
 
 #define SR 44100
-//#define NCHANNELS 2
-
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 1024
-
-//#define END_TIME_IN_MINUTES 0.2
 
 class ofPiApproximator : public PiApproximator{
 public:
@@ -60,6 +55,7 @@ public:
     float verticalFontMargin;
     float myHue = 25;
     float fontSize;
+    std::string windowNumbers[16] = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"};
     ofColor fontColor = ofColor::fromHsb(50*(255/360), 96, 99);
     ofColor bgColor = ofColor(0, 0, 0);
 };
@@ -67,13 +63,23 @@ public:
 
 //--------------------------------------------------------------
 
-class ofAppPi : public ofBaseApp{
+class ofAppPi : public ofBaseApp {
 public:
     ofAppPi(PiSettings AppSettings);
+    ofAppPi(void);
     void setup();
     void update();
     void draw();
     void exit();
+    
+    void applySettings(void);
+    void soundSetup();
+    void oscSetup();
+    void windowSetup();
+    void approximatorSetup();
+    
+    static int defaultWindowWidth(void) { return 1280;}
+    static int defaultWindowHeight(void) { return 1024;}
     
     void keyPressed(int key);
     
@@ -84,8 +90,6 @@ public:
     bool isPlaying(void);
     void toggleStatus(int stat) { status = stat; }
     
-    std::string windowNumbers[16] = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"};
-
     void setNumChannels(int value);
     std::vector<ofPiApproximator*> approximator;
     int status = 1;
@@ -96,5 +100,7 @@ public:
     bool endFlag;
     
     PiSettings settings;
+    ofApproxPiSetupApp* setup_app;
+    bool internal_setup;
     ofSoundStream soundStream;
 };
