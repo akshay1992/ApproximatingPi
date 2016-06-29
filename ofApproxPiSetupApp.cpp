@@ -1,7 +1,7 @@
-#include "ofApproxPiSetupApp.h"
+#include "ofApproxPiSetupGUI.h"
 
 //--------------------------------------------------------------
-void ofApproxPiSetupApp::setup(){
+void ofApproxPiSetupGUI::setup(){
     ofSetWindowPosition(0, 0);
     ofSetWindowShape(500,500);
     
@@ -44,20 +44,20 @@ void ofApproxPiSetupApp::setup(){
     gui->addButton("Save and Run");
     gui->addButton("Abort");
     
-    gui->onDropdownEvent(this, &ofApproxPiSetupApp::onDropDown);
-    gui->onButtonEvent(this, &ofApproxPiSetupApp::onButton);
-    gui->onTextInputEvent(this, &ofApproxPiSetupApp::onTextInput);
+    gui->onDropdownEvent(this, &ofApproxPiSetupGUI::onDropDown);
+    gui->onButtonEvent(this, &ofApproxPiSetupGUI::onButton);
+    gui->onTextInputEvent(this, &ofApproxPiSetupGUI::onTextInput);
 }
 
 //--------------------------------------------------------------
 
-void ofApproxPiSetupApp::onDropDown(ofxDatGuiDropdownEvent e)
+void ofApproxPiSetupGUI::onDropDown(ofxDatGuiDropdownEvent e)
 {
     e.target->setLabel(e.target->getName() + spacer +e.target->getSelected()->getLabel());
 }
 
 //--------------------------------------------------------------
-void ofApproxPiSetupApp::onTextInput(ofxDatGuiTextInputEvent e)
+void ofApproxPiSetupGUI::onTextInput(ofxDatGuiTextInputEvent e)
 {
     try
     {
@@ -72,7 +72,7 @@ void ofApproxPiSetupApp::onTextInput(ofxDatGuiTextInputEvent e)
 
 //--------------------------------------------------------------
 
-void ofApproxPiSetupApp::onButton(ofxDatGuiButtonEvent e)
+void ofApproxPiSetupGUI::onButton(ofxDatGuiButtonEvent e)
 {
     if(e.target->getName() == "Abort")
     {
@@ -102,7 +102,7 @@ void ofApproxPiSetupApp::onButton(ofxDatGuiButtonEvent e)
 }
 
 //--------------------------------------------------------------
-void ofApproxPiSetupApp::exit(void)
+void ofApproxPiSetupGUI::exit(void)
 {
     settings->nChannels = nChannels_options_int[getSelectedIndex("NChannels")];
     settings->windowWidth = widths_options_int[getSelectedIndex("Resolution")];
@@ -113,7 +113,7 @@ void ofApproxPiSetupApp::exit(void)
 }
 
 //--------------------------------------------------------------
-int ofApproxPiSetupApp::getSelectedIndex(std::string dropDownName)
+int ofApproxPiSetupGUI::getSelectedIndex(std::string dropDownName)
 {
     std::string label = (gui->getDropdown(dropDownName)->getSelected()->getLabel());
     int index = -1;

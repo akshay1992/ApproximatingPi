@@ -1,11 +1,14 @@
 #pragma once
 
+//#define SR 44100
+
+#include "ApproximatingPi/ofPiApproximator.h"
+#include "ApproximatingPi/ofApproxPiSetupGUI.h"
+
 #include "ofMain.h"
-#include "PiApproximator.h"
 #include "ofxOsc.h"
+
 #include <vector>
-#include "PiSettings.h"
-#include "ApproximatingPi/ofApproxPiSetupApp.h"
 
 #define AKSHAY
 //#define MATZE
@@ -23,43 +26,6 @@
 #define RECEIVE_PORT 12345
 #define RECEIVE_HOST "matze.local"
 #endif
-
-
-#define SR 44100
-
-class ofPiApproximator : public PiApproximator{
-public:
-    using PiApproximator::PiApproximator;
-    ofPiApproximator(PiSettings &settings);
-    
-    int wNum;
-    ofImage piSymbol;
-    ofTrueTypeFont NumberFont, StatusFont;
-    
-    bool isPlaying(void) {return playing;}
-    
-    virtual void drawDigits(void) override;
-    
-    virtual void drawStatus(void) override;
-    
-    void scaleContent(int w, int h);
-    
-    void drawBlack(void) {};
-    
-    ofBaseApp* main_app;
-    
-    ofFbo fbo;
-    
-    bool playing = false;
-    
-    float verticalFontMargin;
-    float myHue = 25;
-    float fontSize;
-    std::string windowNumbers[16] = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"};
-    ofColor fontColor = ofColor::fromHsb(50*(255/360), 96, 99);
-    ofColor bgColor = ofColor(0, 0, 0);
-};
-
 
 //--------------------------------------------------------------
 
@@ -100,7 +66,7 @@ public:
     bool endFlag;
     
     PiSettings settings;
-    ofApproxPiSetupApp* setup_app;
+    ofApproxPiSetupGUI* setup_app;
     bool internal_setup;
     ofSoundStream soundStream;
 };

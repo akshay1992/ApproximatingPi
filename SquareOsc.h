@@ -1,6 +1,8 @@
 #ifndef SQUAREWAVE_OSCILLATOR
 #define SQUAREWAVE_OSCILLATOR
 
+//A squarewave oscillator with a per-sample output. 
+
 class SquareOsc
 {
 public:

@@ -8,7 +8,7 @@
 #include <vector>	// for n-channels of transposed approximations
 #include "SquareOsc.h" // for audio synthesis
 
-//! Number of digits to consider in the approximation of π.
+//! Number of digits to consider in the approximation of Pi.
 #define APPROXIMATOR_PRECISION 10
 
 const int TRANSPOSITION_FACTOR[] = { 9, 28, 50, 73, 98, 123, 149, 175, 202, 229, 257, 285, 314, 343, 372, 402};
@@ -20,7 +20,9 @@ std::string numberToString(double number);
 /* 
 This class is a pi approximator implemented for use in the sonification of it's digits.
 It approximates based on the infinite series:
-π = 4(1 - 1/3 + 1/5 - 1/7 + 1/9 .....)
+Pi = 4(1 - 1/3 + 1/5 - 1/7 + 1/9 .....)
+ 
+It also generates audio on it's own. 
 */
 
 class PiApproximator

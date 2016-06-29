@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-class ofApproxPiSetupApp {
+class ofApproxPiSetupGUI {
 
 public:
-    ofApproxPiSetupApp(PiSettings& Settings) {settings = &Settings;}
+    ofApproxPiSetupGUI(PiSettings& Settings) {settings = &Settings;}
     void setup();
     void exit();
     int getSelectedIndex(std::string dropDownName);
