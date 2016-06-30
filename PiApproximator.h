@@ -18,11 +18,13 @@ void getDigits(double number, int digits[]);
 std::string numberToString(double number);
 
 /* 
-This class is a pi approximator implemented for use in the sonification of it's digits.
+This class is a generaic pi approximator implemented for use in the sonification of it's digits.
 It approximates based on the infinite series:
 Pi = 4(1 - 1/3 + 1/5 - 1/7 + 1/9 .....)
  
-It also generates audio on it's own. 
+It is designed to be framework independent. No handles are provided for the visuals since this is usually framework dependent. However, atomic member variables are available for access to the current approximation and a sample counter. 
+ 
+ This class can (technically) be reused to do any kind of series approximations by modifying the contents of the approximate() method. But this is not supported.
 */
 
 class PiApproximator

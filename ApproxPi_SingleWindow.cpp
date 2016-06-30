@@ -1,40 +1,40 @@
-#include "ofAppPi.h"
+#include "ApproxPi_SingleWindow.h"
 
-ofAppPi::ofAppPi(PiSettings AppSettings)
+ApproxPi_SingleWindow::ApproxPi_SingleWindow(PiSettings AppSettings)
 {
     settings = AppSettings;
     applySettings();
 }
 
-ofAppPi::ofAppPi(void)
+ApproxPi_SingleWindow::ApproxPi_SingleWindow(void)
 {
     setup_app = new ofApproxPiSetupGUI(settings);
     setup_app->setup();
 }
 
-void ofAppPi::setup(){
-//    ofSetDataPathRoot("../Resources/data/");
+void ApproxPi_SingleWindow::setup(){
+    ofSetDataPathRoot("../Resources/data/");
 }
 
-void ofAppPi::windowSetup(void)
+void ApproxPi_SingleWindow::windowSetup(void)
 {
     ofSetWindowShape(settings.windowWidth, settings.windowHeight);
 }
 
-void ofAppPi::soundSetup(void)
+void ApproxPi_SingleWindow::soundSetup(void)
 {
     soundStream.setDeviceID(settings.audioDeviceID);
     soundStream.setup(this, settings.nChannels, 0, settings.sample_rate, 256, 2);
 }
 
-void ofAppPi::oscSetup(void)
+void ApproxPi_SingleWindow::oscSetup(void)
 {
     receiver.setup(RECEIVE_PORT);
     sender.setup(SEND_HOST, SEND_PORT);
     self_sender.setup(RECEIVE_HOST, RECEIVE_PORT);
 }
 
-void ofAppPi::applySettings(void)
+void ApproxPi_SingleWindow::applySettings(void)
 {
 //    settings.print();
     approximatorSetup();
@@ -44,7 +44,7 @@ void ofAppPi::applySettings(void)
     settings.appliedSettings = true;
 }
 
-void ofAppPi::approximatorSetup()
+void ApproxPi_SingleWindow::approximatorSetup()
 {
     for(int i=0; i<settings.nChannels; i++)
         approximator.push_back(new ofPiApproximator(settings));
@@ -58,7 +58,7 @@ void ofAppPi::approximatorSetup()
     }
 }
 
-void ofAppPi::update(){
+void ApproxPi_SingleWindow::update(){
     if(settings.doneSetup && !settings.appliedSettings)
     {
         if(settings.exit)
@@ -116,7 +116,7 @@ void ofAppPi::update(){
     }
 }
 
-void ofAppPi::draw(){
+void ApproxPi_SingleWindow::draw(){
     if(settings.appliedSettings)
     {
         int x = 0;
@@ -175,32 +175,32 @@ void ofAppPi::draw(){
     }
 }
 
-void ofAppPi::toggleMute() {
+void ApproxPi_SingleWindow::toggleMute() {
     for(int i=0; i<settings.nChannels; i++) {
         approximator[i]->toggleMute();
     }
 }
 
-void ofAppPi::stopPlayback() {
+void ApproxPi_SingleWindow::stopPlayback() {
     for(int i=0; i<settings.nChannels; i++) {
         approximator[i]->playing = false;
         approximator[i]->Reset();
     }
 }
 
-void ofAppPi::togglePlay(void) {
+void ApproxPi_SingleWindow::togglePlay(void) {
     for(int i=0; i<settings.nChannels; i++)
         approximator[i]->playing = !approximator[i]->playing;
 }
 
-bool ofAppPi::isPlaying(void) { // Returns false if any one of them is not playing
+bool ApproxPi_SingleWindow::isPlaying(void) { // Returns false if any one of them is not playing
     bool return_value;
     for(int i=0; i<settings.nChannels; i++)
         return_value = ( return_value && approximator[i]->isPlaying() );
     return return_value;
 }
 
-void ofAppPi::keyPressed(int key){
+void ApproxPi_SingleWindow::keyPressed(int key){
     if(settings.appliedSettings)
     {
         if(key == ' ')
@@ -254,7 +254,7 @@ void ofAppPi::keyPressed(int key){
     }
 }
 
-void ofAppPi::audioOut( float * output, int bufferSize, int nChannels ) {
+void ApproxPi_SingleWindow::audioOut( float * output, int bufferSize, int nChannels ) {
     for (int i=0; i<bufferSize * nChannels; i+=nChannels)
     {
         for (int chan=0; chan<nChannels; chan++)
@@ -282,7 +282,7 @@ void ofAppPi::audioOut( float * output, int bufferSize, int nChannels ) {
     }
 }
 
-void ofAppPi::exit(void) {
+void ApproxPi_SingleWindow::exit(void) {
     ofSoundStreamClose();
 }
 

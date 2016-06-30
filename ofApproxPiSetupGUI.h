@@ -6,6 +6,12 @@
 #include <string>
 #include <vector>
 
+/* This class contains all the required methods for the GUI initialization and behaviour.
+ 
+ Usage: As a member of another class (usually, this is the ofApp)
+ 
+ */
+
 class ofApproxPiSetupGUI {
 
 public:
@@ -37,6 +43,6 @@ public:
     
     std::string spacer = ":        ";
 
-    static int getWindowWidth(void) {return 500;}
-    static int getWindowHeight(void) {return 500;}
+    static int getGuiWindowWidth(void) {return 500;}
+    static int getGuiWindowHeight(void) {return 300;}
 };

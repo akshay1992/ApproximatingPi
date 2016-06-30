@@ -1,9 +1,8 @@
 #include "ofApproxPiSetupGUI.h"
 
-//--------------------------------------------------------------
 void ofApproxPiSetupGUI::setup(){
     ofSetWindowPosition(0, 0);
-    ofSetWindowShape(500,500);
+    ofSetWindowShape(getGuiWindowWidth(),getGuiWindowHeight());
     
     int x=20, y=20;
     
@@ -17,7 +16,6 @@ void ofApproxPiSetupGUI::setup(){
         
     gui->addDropdown("Resolution", screen_resolutions_options_str);
     gui->getDropdown("Resolution")->setLabel("Resolution"+spacer+screen_resolutions_options_str[0]);
-
     
     audio_devices = ofSoundStreamListDevices();
     for(int i=0; i<audio_devices.size(); i++)

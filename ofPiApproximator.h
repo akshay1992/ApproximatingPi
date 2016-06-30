@@ -6,6 +6,13 @@
 #include "PiApproximator.h"
 #include "PiSettings.h"
 
+
+/*
+ This is the openframeworks implementation of the PiApproximator. 
+ 
+ Each approximator is designed to be self-sufficient. It implements (or derives) methods to tick, render, draw, and make it's own sounds.
+ */
+
 class ofPiApproximator : public PiApproximator{
 public:
     using PiApproximator::PiApproximator;
