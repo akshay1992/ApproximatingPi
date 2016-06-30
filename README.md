@@ -1,4 +1,4 @@
-pproximating Pi
+# Approximating Pi
 
 Approximating pi is a multichannel audio-visual piece written by Clarence Barlow. This repo is an implementation of this piece for a multichannel playback of arbitrary length and up to 16 channels.
 
