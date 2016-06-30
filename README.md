@@ -39,4 +39,4 @@ cp -r bin/data "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Resources";
 -Akshay Cadambi (akshay19.92 at g-mail dot com)   
 -Matthias Wagner (Github: matzewagner)  
 **For:** Clarence Barlow.  
-**Last performed:** June 1 2016 at SBCAST, Santa Barbara (6 Channel, 2 hour version)
+**Last performed:** March 28 2016 at SBCAST, Santa Barbara (6 Channel, 2 hour version)
