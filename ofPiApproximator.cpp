@@ -19,8 +19,18 @@ void ofPiApproximator::drawDigits(void)
     int place = 1;
     float letterWidthScaler = 0.8;
     
+    // draw pi symbol
     piSymbol.draw(-fontSize*0.5, verticalFontMargin);
     
+    // draw window number
+    ofPushMatrix();
+    ofSetColor(192, 192, 192);
+    ofTranslate(-fontSize*0.25, (fontSize + verticalFontMargin) * 1.5);
+    ofScale(0.4, 0.3);
+    NumberFont.drawString(windowNumbers[wNum-1], 0, 0);
+    ofPopMatrix();
+    
+    // get current values
     int digits[APPROXIMATOR_PRECISION];
     getDigits(number, digits);
     
