@@ -6,7 +6,7 @@ The current implementation is written for Openframeworks on OSX10.11.
 
 Usage
 =====
-Clone this repo into the src directory of a fresh openframeworks project. Make sure the openframeworks project has the following addons. 
+Clone this repo into the `src` directory of a fresh openframeworks project. Make sure the openframeworks project has the following addons. 
  * [ofxDatGui](https://github.com/braitsch/ofxDatGui)
  * ofxOSC
 
