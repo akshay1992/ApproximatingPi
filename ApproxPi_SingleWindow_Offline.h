@@ -8,9 +8,11 @@
 /*
  This app renders the piece for the desired duration into video frames and audio files. 
  
- This is very bare-bones and hacked together,
+ Set the duration, nChannels etc, in the setup() function.
  
+ Console shows progress in percentage as it runs. 
  
+ Make sure to have a folder named `frames` within the data folder.
  
  */
 
