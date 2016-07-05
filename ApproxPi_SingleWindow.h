@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ApproximatingPi/ofPiApproximator.h"
-#include "ApproximatingPi/ofApproxPiSetupGUI.h"
+#include "ofPiApproximator.h"
+#include "ofApproxPiSetupGUI.h"
 
 #include "ofMain.h"
 #include "ofxOsc.h"

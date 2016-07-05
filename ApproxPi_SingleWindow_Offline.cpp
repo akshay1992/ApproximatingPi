@@ -3,6 +3,10 @@
 
 //--------------------------------------------------------------
 void ApproxPi_SingleWindow_Offline::setup(){
+    
+    audio_output_path = "../../../output/";
+    frames_output_path = "../output/frames/";
+    
     settings.nChannels = 6;
     settings.windowWidth = 1280;
     settings.windowHeight = 1024;
@@ -28,19 +32,24 @@ void ApproxPi_SingleWindow_Offline::setup(){
     }
 
     ofSetWindowShape(settings.windowWidth, settings.windowHeight);
-    
     output_fbo.allocate(settings.windowWidth, settings.windowHeight, GL_RGB);
     
     int fps = 30;
     int fps_maxCount = ((float) settings.sample_rate/fps);
-    int fps_counter = fps_maxCount;
+    int fps_counter = 1;
     int frameCounter = 0;
     
     int numFrames = settings.dur_in_mins*60.0*fps;
+
+    sf.channels(6);
+    sf.frameRate(44100);
+    sf.path(audio_output_path+"audio.wav");
+    sf.openWrite();
+    
     
     do
     {
-        tick_audio();
+        tick_audio(sf);
         
         fps_counter--;
         if(fps_counter == 0)
@@ -50,14 +59,13 @@ void ApproxPi_SingleWindow_Offline::setup(){
 
             draw_everything();
             output_fbo.readToPixels(img);
-            img.save( "frames/frame_"+to_string(frameCounter)+".jpeg");
+            img.save( frames_output_path+"frame_"+to_string(frameCounter)+".jpeg");
             cout << frameCounter*100.0/numFrames << "%" << endl;
         }
 
     } while( endFlag == false);
     
-    draw_everything();
-
+    sf.close();
 }
 
 //--------------------------------------------------------------
@@ -148,9 +156,9 @@ void ApproxPi_SingleWindow_Offline::draw_everything(void)
     output_fbo.end(); ////
 }
 
-void ApproxPi_SingleWindow_Offline::tick_audio(void)
+void ApproxPi_SingleWindow_Offline::tick_audio(gam::SoundFile& sf)
 {
-    float dummy = 0;
+    float* frame = (float*) calloc(settings.nChannels, sizeof(float));
     for (int chan=0; chan<settings.nChannels; chan++)
     {
         // check for when the piece should end
@@ -165,13 +173,15 @@ void ApproxPi_SingleWindow_Offline::tick_audio(void)
         
         if (approximator[chan]->isPlaying() && !approximator[chan]->hasEnded())
         {
-            dummy = approximator[chan]->tick();
+            frame[chan] = approximator[chan]->tick();
         }
-        
     }
+    
+    sf.write(frame, 1);
     
     if (approximator[0]->sampleCounter >= settings.dur_in_mins*60.0*settings.sample_rate)
     {
         endFlag = true;
     }
+    free(frame);
 }
