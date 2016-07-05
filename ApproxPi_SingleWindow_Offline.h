@@ -1,8 +1,7 @@
 #pragma once
 #include "PiSettings.h"
 #include "ofPiApproximator.h"
-#include "../../Gamma/Gamma/Recorder.h"
-#include "../../Gamma/Gamma/SoundFile.h"
+#include "from_Gamma/SoundFile.h"
 
 #include "ofMain.h"
 #include <vector>
@@ -13,16 +12,26 @@
  Setting up XCode:
  =================
  
+ - Clone this repo into the src/ folder of openframeworks project.
+ - Checkout branch `offline_audio_rendering`
+ - Add ALL the files from src/ApproximatingPi (including the ones in src/ApproximatingPi/from_Gamma/
+ 
+ - Make sure to have the following folders inside bin/
+    * output/
+    * output/frames/
+ 
+ (This is because the output will be stored in the output/ folder)
+ 
+
+ Running:
+ ============
+ Build debug (not release).
  
  Set the duration, nChannels etc, in the setup() function.
  
- Console shows progress in percentage as it runs. 
+ Console shows progress in percentage as it runs.
  
- Make sure to have the following folders inside bin/
- * output
- * output/frames
-
- The output will be stored in the output/ folder. 
+ Closes once it is finished. No window opens up. 
  
  */
 

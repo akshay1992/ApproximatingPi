@@ -70,7 +70,7 @@ void ApproxPi_SingleWindow_Offline::setup(){
 
 //--------------------------------------------------------------
 void ApproxPi_SingleWindow_Offline::update(){
-
+    ofExit();
 }
 
 //--------------------------------------------------------------
