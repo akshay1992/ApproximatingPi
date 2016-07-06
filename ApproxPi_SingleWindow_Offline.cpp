@@ -12,7 +12,8 @@ void ApproxPi_SingleWindow_Offline::setup(){
     settings.windowHeight = 1024;
     settings.audioDeviceID = 4;
     settings.sample_rate = 44100;
-    settings.dur_in_mins = 1;
+    settings.dur_in_mins = 0.1;
+    settings.fade_time_in_seconds = 0.1;
     
     settings.doneSetup = true;
     settings.appliedSettings = true;
@@ -162,12 +163,12 @@ void ApproxPi_SingleWindow_Offline::tick_audio(gam::SoundFile& sf)
     for (int chan=0; chan<settings.nChannels; chan++)
     {
         // check for when the piece should end
-        if (approximator[chan]->sampleCounter >= settings.dur_in_mins*60.0*settings.sample_rate && (approximator[chan]->sampleCounter%(settings.sample_rate/10)) == 0)
+        if (approximator[chan]->sampleCounter >= ((settings.dur_in_mins*60.0) -1.0)*settings.sample_rate && (approximator[chan]->sampleCounter%(settings.sample_rate/10)) == 0)
         {
-            if (!approximator[chan]->hasEnded() && endFlag )
+            if (!approximator[chan]->hasEnded() && fadeFlag )
             {
                 approximator[chan]->end();
-                endFlag = false;
+                fadeFlag = false;
             }
         }
         
@@ -179,9 +180,19 @@ void ApproxPi_SingleWindow_Offline::tick_audio(gam::SoundFile& sf)
     
     sf.write(frame, 1);
     
-    if (approximator[0]->sampleCounter >= settings.dur_in_mins*60.0*settings.sample_rate)
+    // calculate the frame number at which to start the fade out
+    int fadeOut_frame = settings.fade_time_in_seconds*settings.nChannels*settings.sample_rate;
+    
+    if (approximator[0]->sampleCounter >= (settings.dur_in_mins*60.0*settings.sample_rate) - fadeOut_frame)
+    {
+        fadeFlag = true;
+    }
+    
+    // end the program when the last approximator has ended
+    if (approximator[int(settings.nChannels-1)]->hasEnded())
     {
         endFlag = true;
     }
+    
     free(frame);
 }
