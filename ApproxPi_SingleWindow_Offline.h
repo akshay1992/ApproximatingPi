@@ -52,6 +52,7 @@ class ApproxPi_SingleWindow_Offline : public ofBaseApp{
     void draw_everything(void);
     void tick_audio(gam::SoundFile& sf);
     bool endFlag = false;
+    bool fadeFlag = false;
     
     std::string audio_output_path, frames_output_path;
     
